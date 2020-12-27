@@ -1,0 +1,18 @@
+
+#module
+#define STD_OUTPUT_HANDLE -11
+#define STD_ERROR_HANDLE -12
+
+#uselib "kernel32"
+#cfunc GetStdHandle "GetStdHandle" int
+#func SetConsoleTextAttribute "SetConsoleTextAttribute" int,int
+#func WriteConsole "WriteConsoleA" int,str,int,int
+
+#deffunc consoleColor int p1
+	col = p1
+	if(col == 0):col = $7
+	hErr = GetStdHandle(STD_ERROR_HANDLE)
+	SetConsoleTextAttribute hErr,col
+	WriteConsole hErr,"",0,0
+	return
+#global

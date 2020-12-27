@@ -1,0 +1,55 @@
+#runtime "hsp3cl"
+
+#include "hspsock.as"
+#include "hsp3util.as"
+#include "hspext.as"
+
+#include "./src/console.hsp"
+#include "./src/httpserver.hsp"
+
+#const PORT	8080
+
+	// init
+	consoleColor
+
+	// IP get
+	ipget
+	ipAddress = refstr
+	url = strf("http://%s:%d/index.html",ipAddress,PORT)
+	mes strf("Open server. [%s]",url)
+
+*server
+	// wait request
+	waitHTTPRequest 1,PORT
+		mes refstr
+		requestName = getHTTPName()
+		requestMethod = getHTTPMethod()
+
+	// init
+	httpStatus = 200
+	
+	// routing
+	switch requestName
+	case "/"
+		returnText httpStatus,loadText("./index.html")
+		swbreak
+	default
+		body = loadText("." + requestName)
+		if(stat == 1){
+			returnText httpStatus,body
+		}else{
+			httpStatus = 404
+			returnText httpStatus,""
+		}
+	swend
+
+	// return data
+	getdatestr date
+	gettimestr time
+	consoleColor 			:print strf("[HSP-HTTP] %s %s |",date,time),1
+	consoleColor 0x17	:print strf(" %03d ",httpStatus),1
+	consoleColor 			:print strf("| %s | %s",requestMethod,requestName),0
+
+	await 1
+	goto *server
+

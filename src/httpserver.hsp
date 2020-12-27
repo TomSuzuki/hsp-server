@@ -1,0 +1,76 @@
+
+// copyright | TomSuzuki 2020
+
+#module
+
+#deffunc waitHTTPRequest int socketid,int port
+	// init
+	socket = socketid
+
+	// make
+	sockmake@ socket,port
+	if(stat != 0){
+		dialog "Error",1
+		stop
+	}
+
+	// wait request
+	repeat
+		sockwait@ 1
+		if(stat　==　0):break
+		if(stat　>　1){
+			dialog "Error",1
+			stop
+		}
+		await 1
+	loop
+
+	// get
+	sdim response,1024*4
+	sockcheck@ 1
+	if(stat == 0):sockget@ response,varsize(response),1
+
+	// response analysis (ex.)GET /index.html HTTP/1.1
+	split response,"\n",request
+	split request," ",method,name
+
+	// return
+	sdim res,256,2
+	requestName = name
+	requestMethod = method
+	
+	return response
+
+#deffunc returnText int httpStatus,str httpBody
+	// response
+	httpResponse = "OK"
+	if(httpStatus == 404):httpResponse = "Not Found"
+
+	// return
+	head = strf("HTTP/1.1 %d %s\nContent-Type: text/html\nConnection: Close\n\n",httpStatus,httpResponse)
+	response = head + httpBody
+	sockput@ response,socket
+	sockclose@ socket
+	
+	return
+
+#defcfunc getHTTPName
+	return requestName
+#defcfunc getHTTPMethod
+	return requestMethod
+#global
+
+#module
+#defcfunc loadText str path
+	mref bool,64
+	notedata = ""
+	bool = 0
+	exist path
+	if(strsize != -1){
+		bool = 1
+		notesel notedata
+		noteload path
+		noteunsel
+	}
+	return notedata
+#global
