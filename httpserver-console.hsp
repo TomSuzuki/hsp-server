@@ -1,4 +1,4 @@
-#runtime "hsp3cl"
+;#runtime "hsp3cl"
 
 #include "hspsock.as"
 #include "hsp3util.as"
@@ -49,6 +49,9 @@
 	consoleColor 			:print strf("[HSP-HTTP] %s %s |",date,time),1
 	consoleColor 0x17	:print strf(" %03d ",httpStatus),1
 	consoleColor 			:print strf("| %s | %s",requestMethod,requestName),0
+
+	aplfocus
+	aplkey 32,0
 
 	await 1
 	goto *server
