@@ -1,0 +1,22 @@
+
+#module
+#defcfunc router str requestName,str requestMethod
+
+	// init
+	httpStatus = 200
+
+	// routing
+	route = requestMethod+requestName
+	split route,"?",route
+	switch route
+	case "GET/"
+	case "GET/index.html"
+	case "GET/INDEX.HTML"
+		httpStatus = returnFile("./index.html")
+		swbreak
+	default
+		httpStatus = returnFile("." + requestName)
+	swend
+	
+	return httpStatus
+#global

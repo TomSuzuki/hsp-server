@@ -1,0 +1,20 @@
+
+
+#module
+#include "kernel32.as"
+#define ctype I64TODBL(%1) double(strf("%%I64u",%1))
+#deffunc timeStart
+	ddim freq,1
+	ddim before,1
+	ddim after,1
+	QueryPerformanceFrequency varptr(freq)
+	QueryPerformanceCounter varptr(before)
+	return
+
+#defcfunc timeGet
+	QueryPerformanceCounter varptr(after)
+	timedif = ((I64TODBL(after) - I64TODBL(before)) / I64TODBL(freq))
+	timedif = timedif * 1000
+	return timedif
+
+#global

@@ -1,58 +1,64 @@
-;#runtime "hsp3cl"
+#runtime "hsp3cl"
+;#runtime "hsp3mt"
 
 #include "hspsock.as"
 #include "hsp3util.as"
 #include "hspext.as"
+#include "form_decode.as"
+#include "encode.as"
+
+#include "./router.hsp"
 
 #include "./src/console.hsp"
 #include "./src/httpserver.hsp"
+#include "./src/timer.hsp"
+#include "./src/str.hsp"
 
 #const PORT	8080
 
+#define DIR	"./html"
+
 	// init
 	consoleColor
+	dirlist temp,DIR,0
+	if(stat == 0):mkdir DIR
+	chdir DIR
 
 	// IP get
 	ipget
 	ipAddress = refstr
 	url = strf("http://%s:%d/index.html",ipAddress,PORT)
-	mes strf("Open server. [%s]",url)
+	mes strf("open server. [%s]",url)
 
 *server
 	// wait request
 	waitHTTPRequest 1,PORT
-		mes refstr
+		;mes refstr
 		requestName = getHTTPName()
 		requestMethod = getHTTPMethod()
+		requestFrom = getHTTPFrom()
+	timeStart
 
-	// init
-	httpStatus = 200
-	
-	// routing
-	switch requestName
-	case "/"
-		returnText httpStatus,loadText("./index.html")
-		swbreak
-	default
-		body = loadText("." + requestName)
-		if(stat == 1){
-			returnText httpStatus,body
-		}else{
-			httpStatus = 404
-			returnText httpStatus,""
-		}
-	swend
+	// return
+	temp = requestName
+	sdim requestName,varsize(temp)
+	form_decode requestName,temp,0
+	requestName = utf8n2sjis(requestName)
+	httpStatus = router(requestName,requestMethod)
 
-	// return data
+	// log
+	/**/
 	getdatestr date
 	gettimestr time
-	consoleColor 			:print strf("[HSP-HTTP] %s %s |",date,time),1
-	consoleColor 0x17	:print strf(" %03d ",httpStatus),1
-	consoleColor 			:print strf("| %s | %s",requestMethod,requestName),0
-
-	aplfocus
-	aplkey 32,0
-
-	await 1
+	consoleColor
+		print strf("[HSP-SERVER] %s %s:%03d |",date,time,gettime(7)),1
+	consoleColor consoleColorStatus(httpStatus)
+		print strf(" %03d ",httpStatus),1
+	consoleColor
+		print strf("| %5s | %.4fms | %s | %s",fillSpace(requestMethod,5),timeGet(),requestFrom,requestName),0
+	/**/
+	
+	await
 	goto *server
+
 

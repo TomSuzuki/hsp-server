@@ -1,0 +1,11 @@
+
+#module
+#defcfunc fillSpace str p1,int p2
+	len = strlen(p1)
+	if(len >= p2):return p1
+	len = len - p2
+	bf = len/2 + len\2
+	af = len/2
+	return strf("%"+bf+"s%s%"+af+"s","",p1,"")
+
+#global

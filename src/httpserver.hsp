@@ -1,34 +1,44 @@
 
 // copyright | TomSuzuki 2020
 
+
 #module
 
 #deffunc waitHTTPRequest int socketid,int port
 	// init
 	socket = socketid
+	socketSub = (socketid + 1) \ 32
 
 	// make
+*init
+	sockclose@ socketSub
 	sockmake@ socket,port
 	if(stat != 0){
-		dialog "Error",1
+		dialog "Error - init Error",1
 		stop
 	}
+	
+
+	// for response
+	sdim response,1024*2
 
 	// wait request
 	repeat
-		sockwait@ 1
-		if(stat　==　0):break
-		if(stat　>　1){
-			dialog "Error",1
+		ct = cnt
+		sockwait@ socket,socketSub
+		if(stat == 0):break
+		if(stat > 1){
+			dialog "Error - datawait Error",1
 			stop
 		}
 		await 1
 	loop
+	requestFrom = refstr
 
 	// get
-	sdim response,1024*4
-	sockcheck@ 1
-	if(stat == 0):sockget@ response,varsize(response),1
+	sockcheck@ socketSub
+	if(stat == 0):sockget@ response,varsize(response),socketSub
+	if(response == ""):goto *init // if body is nil
 
 	// response analysis (ex.)GET /index.html HTTP/1.1
 	split response,"\n",request
@@ -42,35 +52,129 @@
 	return response
 
 #deffunc returnText int httpStatus,str httpBody
-	// response
-	httpResponse = "OK"
-	if(httpStatus == 404):httpResponse = "Not Found"
-
 	// return
-	head = strf("HTTP/1.1 %d %s\nContent-Type: text/html\nConnection: Close\n\n",httpStatus,httpResponse)
-	response = head + httpBody
-	sockput@ response,socket
-	sockclose@ socket
-	
+	head = strf("HTTP/1.1 %d %s\nContent-Type: text/plain\nConnection: close\n\n",httpStatus,getResponseStr(httpStatus))
+	sockput@ head,socketSub
+	sockput@ httpBody,socketSub
 	return
+
+#deffunc returnBuf int httpStatus,var httpBody
+	// return
+	head = strf("HTTP/1.1 %d %s\nContent-Type: text/plain\nConnection: close\n\n",httpStatus,getResponseStr(httpStatus))
+	sockput@ head,socketSub
+	sockputb@ httpBody,0,varsize(httpBody),socketSub
+	return
+
+#defcfunc returnFile str path
+	// init
+	sdim buf
+	status = 404
+
+	// load file
+	loadBuf path,buf
+	if(stat != -1){
+		status = 200
+	}
+
+	// head
+	head = strf("HTTP/1.1 %d %s\nContent-Type: %s\nConnection: close\nServer: hsp-server\n\n",status,getResponseStr(status),contentTypeFromExtension(path))
+
+	// put
+	sockput@ head,socketSub
+	sockputb@ buf,0,varsize(buf),socketSub
+	
+	return status
+	
+#defcfunc getResponseStr int httpStatus
+
+	if(httpStatus == 200):return "OK"
+	if(httpStatus == 400):return "Bad Request"
+	if(httpStatus == 404):return "Not Found"
+	if(httpStatus == 500):return "Internal Server Error"
+	
+	return ""
+
+#defcfunc contentTypeFromExtension str p1
+
+	extension = getpath(p1,2+16)
+	
+	if(extension == ".html")	:return "text/html"
+	if(extension == ".htm")		:return "text/html"
+	if(extension == ".xml")		:return "text/xml"
+	if(extension == ".js")		:return "text/javascript"
+	if(extension == ".vbs")		:return "text/vbscript"
+	if(extension == ".css")		:return "text/css"
+	if(extension == ".gif")		:return "image/gif"
+	if(extension == ".jpg")		:return "image/jpeg"
+	if(extension == ".jpeg")	:return "image/jpeg"
+	if(extension == ".jpe")		:return "image/jpeg"
+	if(extension == ".jfif")	:return "image/jpeg"
+	if(extension == ".jfi")		:return "image/jpeg"
+	if(extension == ".jif")		:return "image/jpeg"
+	if(extension == ".png")		:return "image/png"
+	if(extension == ".cgi")		:return "application/x-httpd-cgi"
+	if(extension == ".doc")		:return "application/msword"
+	if(extension == ".pdf")		:return "application/pdf"
+	if(extension == ".csv")		:return "text/csv"
+	if(extension == ".exe")		:return "application/octet-stream"
+	if(extension == ".json")	:return "application/json"
+	if(extension == ".bmp")		:return "image/bmp"
+	if(extension == ".svg")		:return "image/svg+xml"
+	if(extension == ".zip")		:return "application/zip"
+	if(extension == ".mp3")		:return "audio/mpeg"
+	if(extension == ".mp4")		:return "video/mp4"
+	if(extension == ".mpeg")	:return "video/mpeg"
+
+	return "text/plain"
 
 #defcfunc getHTTPName
 	return requestName
+	
 #defcfunc getHTTPMethod
 	return requestMethod
+
+#defcfunc getHTTPFrom
+	return requestFrom
+
+#defcfunc getHeader str headText,str headName
+	notedata = headText
+	headNameSelect = getpath(headName + ": ",16)
+	res = ""
+	len = strlen(headNameSelect)
+	notesel notedata
+	repeat noteinfo(0)
+		noteget data,cnt
+		d = getpath(data,16)
+		if(strmid(d,0,len) == headNameSelect){
+			res = strmid(data,-1,strlen(data)-len)
+			break
+		}
+	loop
+	noteunsel
+
+	return res
 #global
 
 #module
 #defcfunc loadText str path
-	mref bool,64
+	mref size,64
 	notedata = ""
-	bool = 0
 	exist path
-	if(strsize != -1){
-		bool = 1
+	size = strsize
+	if(size != -1){
 		notesel notedata
 		noteload path
 		noteunsel
 	}
 	return notedata
+#deffunc loadBuf str path,var buf
+	sdim buf
+	mref size,64
+	exist path
+	size = strsize
+	if(size != -1){
+		sdim buf,size
+		bload path,buf,-1
+	}
+	return
 #global
