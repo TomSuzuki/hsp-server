@@ -18,46 +18,25 @@
 #const PORT	8080
 #const SOCKET	1
 
-#define DIR	"./html"
-
 	// init
-	timeStart
-	consoleColor
-	dirlist temp,DIR,0
-	if(stat == 0):mkdir DIR
-	chdir DIR
-	;onerror goto*server_reset
-
-	// IP get
-	ipget
-	ipAddress = refstr
-	url = strf("http://%s:%d/index.html",ipAddress,PORT)
-	mes strf("open server. [%s]",url)
-
-	goto *server
-	
-*server_reset
-
-	mes strf("[warning] wparam=%d, lparam=%d",wparam,lparam)
-	returnText 500,""
-	logPrint 500, requestMethod, requestFrom, requestName
-	stop
+	initLog
+	initServer PORT,SOCKET
 
 *server
 	// wait request
-	waitHTTPRequest SOCKET,PORT
-		;mes refstr
+	waitHTTPRequest
+		request = refstr
 		requestName = getHTTPName()
 		requestMethod = getHTTPMethod()
 		requestFrom = getHTTPFrom()
-	timeStart
 
 	// return
+	timeStart
 	temp = requestName
 	sdim requestName,varsize(temp)
 	form_decode requestName,temp,0
 	requestName = utf8n2sjis(requestName)
-	httpStatus = router(requestName,requestMethod)
+	httpStatus = router(requestName,requestMethod,request)
 
 	// log
 	logPrint httpStatus, requestMethod, requestFrom, requestName

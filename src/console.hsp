@@ -29,3 +29,10 @@
 	return 0x0F
 	
 #global
+
+#module
+#deffunc initLog
+	timeStart
+	consoleColor
+	return
+#global

@@ -1,6 +1,6 @@
 
 #module
-#defcfunc router str requestName,str requestMethod
+#defcfunc router str requestName,str requestMethod,str request
 
 	// init
 	httpStatus = 200
@@ -15,7 +15,7 @@
 		httpStatus = returnFile("./index.html")
 		swbreak
 	case "GET/ping"
-		httpStatus = api_ping()
+		httpStatus = api_ping(request)
 		swbreak
 	default
 		httpStatus = returnFile("." + requestName)

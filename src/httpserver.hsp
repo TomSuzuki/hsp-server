@@ -5,8 +5,26 @@
 #module
 
 #define serverName "hsp-server"
+#define DIR	"./html"
 
-#deffunc waitHTTPRequest int socketid,int port
+#deffunc initServer int portNumber,int socketNumber
+	socketid = socketNumber
+	port = portNumber
+
+	// chdir
+	dirlist temp,DIR,0
+	if(stat == 0):mkdir DIR
+	chdir DIR
+
+	// IP get
+	ipget@
+	ipAddress = refstr
+	url = strf("http://%s:%d/index.html",ipAddress,portNumber)
+	mes strf("open server. [%s]",url)
+
+	return
+
+#deffunc waitHTTPRequest
 	// init
 	socket = socketid
 	socketSub = (socketid + 1) \ 32
@@ -55,11 +73,7 @@
 
 #deffunc returnText int httpStatus,str httpBody
 	// head
-	head =  strf("HTTP/1.1 %d %s\n",status,httpResponseMessage(status))
-	head += strf("Content-Type: %s charset=shift_jis\n",contentTypeFromExtension(".txt"))
-	head += strf("Connection: close\n")
-	head += strf("Server: %s\n",serverName)
-	head += strf("\n")
+	head = createHead(status, ".txt")
 
 	// put
 	sockput@ head,socketSub
@@ -69,11 +83,7 @@
 
 #deffunc returnBuf int httpStatus,var httpBody
 	// head
-	head =  strf("HTTP/1.1 %d %s\n",status,httpResponseMessage(status))
-	head += strf("Content-Type: %s charset=shift_jis\n",contentTypeFromExtension(".txt"))
-	head += strf("Connection: close\n")
-	head += strf("Server: %s\n",serverName)
-	head += strf("\n")
+	head = createHead(status, ".txt")
 
 	// put
 	sockput@ head,socketSub
@@ -93,17 +103,23 @@
 	}
 
 	// head
-	head =  strf("HTTP/1.1 %d %s\n",status,httpResponseMessage(status))
-	head += strf("Content-Type: %s charset=shift_jis\n",contentTypeFromExtension(path))
-	head += strf("Connection: close\n")
-	head += strf("Server: %s\n",serverName)
-	head += strf("\n")
+	head = createHead(status, path)
 
 	// put
 	sockput@ head,socketSub
 	sockputb@ buf,0,varsize(buf),socketSub
 	
 	return status
+
+#defcfunc createHead int _status,str _path
+	// head
+	head =  strf("HTTP/1.1 %d %s\n",_status,httpResponseMessage(_status))
+	head += strf("Content-Type: %s charset=shift_jis\n",contentTypeFromExtension(_path))
+	head += strf("Connection: close\n")
+	head += strf("Server: %s\n",serverName)
+	head += strf("\n")
+	
+	return head
 	
 #defcfunc httpResponseMessage int httpStatus
 
@@ -235,6 +251,27 @@
 	loop
 	noteunsel
 
+	return res
+
+#defcfunc getParameter str headText,str parameterName
+	res = ""
+
+	temp = headText
+	notesel temp
+	noteget data.0
+	noteunsel
+
+	split data," ",temp,data
+	split data,"?",temp,data
+	split data,"&",data
+	repeat stat
+		split data(cnt),"=",key,dat
+		if(key == parameterName){
+			res = dat
+			break
+		}
+	loop
+	
 	return res
 #global
 
