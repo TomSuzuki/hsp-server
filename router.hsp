@@ -14,6 +14,9 @@
 	case "GET/INDEX.HTML"
 		httpStatus = returnFile("./index.html")
 		swbreak
+	case "GET/ping"
+		httpStatus = api_ping()
+		swbreak
 	default
 		httpStatus = returnFile("." + requestName)
 	swend

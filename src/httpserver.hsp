@@ -53,14 +53,14 @@
 
 #deffunc returnText int httpStatus,str httpBody
 	// return
-	head = strf("HTTP/1.1 %d %s\nContent-Type: text/plain\nConnection: close\n\n",httpStatus,getResponseStr(httpStatus))
+	head = strf("HTTP/1.1 %d %s\nContent-Type: text/plain; charset=shift_jis\nConnection: close\n\n",httpStatus,getResponseStr(httpStatus))
 	sockput@ head,socketSub
 	sockput@ httpBody,socketSub
 	return
 
 #deffunc returnBuf int httpStatus,var httpBody
 	// return
-	head = strf("HTTP/1.1 %d %s\nContent-Type: text/plain\nConnection: close\n\n",httpStatus,getResponseStr(httpStatus))
+	head = strf("HTTP/1.1 %d %s\nContent-Type: text/plain charset=shift_jis\nConnection: close\n\n",httpStatus,getResponseStr(httpStatus))
 	sockput@ head,socketSub
 	sockputb@ httpBody,0,varsize(httpBody),socketSub
 	return
@@ -77,7 +77,7 @@
 	}
 
 	// head
-	head = strf("HTTP/1.1 %d %s\nContent-Type: %s\nConnection: close\nServer: hsp-server\n\n",status,getResponseStr(status),contentTypeFromExtension(path))
+	head = strf("HTTP/1.1 %d %s\nContent-Type: %s charset=shift_jis\nConnection: close\nServer: hsp-server\n\n",status,getResponseStr(status),contentTypeFromExtension(path))
 
 	// put
 	sockput@ head,socketSub
@@ -87,10 +87,73 @@
 	
 #defcfunc getResponseStr int httpStatus
 
+	if(httpStatus == 100):return "Continue"
+	if(httpStatus == 101):return "Switching Protocol"
+	if(httpStatus == 102):return "Processing"
+	if(httpStatus == 103):return "Early Hints"
+
 	if(httpStatus == 200):return "OK"
+	if(httpStatus == 201):return "Created"
+	if(httpStatus == 202):return "Accepted"
+	if(httpStatus == 203):return "Non-Authoritative Information"
+	if(httpStatus == 204):return "No Content"
+	if(httpStatus == 205):return "Reset Content"
+	if(httpStatus == 206):return "Partial Content"
+	if(httpStatus == 207):return "Multi-Status"
+	if(httpStatus == 208):return "Already Reported"
+	if(httpStatus == 226):return "IM Used"
+
+	if(httpStatus == 300):return "Multiple Choice"
+	if(httpStatus == 301):return "Moved Permanently"
+	if(httpStatus == 302):return "Found"
+	if(httpStatus == 303):return "See Other"
+	if(httpStatus == 304):return "Not Modified"
+	if(httpStatus == 305):return "Use Proxy"
+	if(httpStatus == 306):return "unused"
+	if(httpStatus == 307):return "Temporary Redirect"
+	if(httpStatus == 308):return "Permanent Redirect"
+	
 	if(httpStatus == 400):return "Bad Request"
+	if(httpStatus == 401):return "Unauthorized"
+	if(httpStatus == 402):return "Payment Required"
+	if(httpStatus == 403):return "Forbidden"
 	if(httpStatus == 404):return "Not Found"
+	if(httpStatus == 405):return "Method Not Allowed"
+	if(httpStatus == 406):return "Not Acceptable"
+	if(httpStatus == 407):return "Proxy Authentication Required"
+	if(httpStatus == 408):return "Request Timeout"
+	if(httpStatus == 409):return "Conflict"
+	if(httpStatus == 410):return "Gone"
+	if(httpStatus == 411):return "Length Required"
+	if(httpStatus == 412):return "Precondition Failed"
+	if(httpStatus == 413):return "Payload Too Large"
+	if(httpStatus == 414):return "URI Too Long"
+	if(httpStatus == 415):return "Unsupported Media Type"
+	if(httpStatus == 416):return "Range Not Satisfiable"
+	if(httpStatus == 417):return "Expectation Failed"
+	if(httpStatus == 418):return "I'm a teapot"
+	if(httpStatus == 421):return "Misdirected Request"
+	if(httpStatus == 422):return "Unprocessable Entity"
+	if(httpStatus == 423):return "Locked"
+	if(httpStatus == 424):return "Failed Dependency"
+	if(httpStatus == 425):return "Too Early"
+	if(httpStatus == 426):return "Upgrade Required"
+	if(httpStatus == 428):return "Precondition Required"
+	if(httpStatus == 429):return "Too Many Requests"
+	if(httpStatus == 431):return "Request Header Fields Too Large"
+	if(httpStatus == 451):return "Unavailable For Legal Reasons"
+	
 	if(httpStatus == 500):return "Internal Server Error"
+	if(httpStatus == 501):return "Not Implemented"
+	if(httpStatus == 502):return "Bad Gateway"
+	if(httpStatus == 503):return "Service Unavailable"
+	if(httpStatus == 504):return "Gateway Timeout"
+	if(httpStatus == 505):return "HTTP Version Not Supported"
+	if(httpStatus == 506):return "Variant Also Negotiates"
+	if(httpStatus == 507):return "Insufficient Storage"
+	if(httpStatus == 508):return "Loop Detected"
+	if(httpStatus == 510):return "Not Extended"
+	if(httpStatus == 511):return "Network Authentication Required"
 	
 	return ""
 

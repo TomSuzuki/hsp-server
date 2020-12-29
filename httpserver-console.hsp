@@ -1,5 +1,4 @@
 #runtime "hsp3cl"
-;#runtime "hsp3mt"
 
 #include "hspsock.as"
 #include "hsp3util.as"
@@ -13,8 +12,12 @@
 #include "./src/httpserver.hsp"
 #include "./src/timer.hsp"
 #include "./src/str.hsp"
+#include "./src/log.hsp"
+
+#include "./api/ping.hsp"
 
 #const PORT	8080
+#const SOCKET	1
 
 #define DIR	"./html"
 
@@ -23,6 +26,7 @@
 	dirlist temp,DIR,0
 	if(stat == 0):mkdir DIR
 	chdir DIR
+	onerror goto*server_reset
 
 	// IP get
 	ipget
@@ -30,9 +34,18 @@
 	url = strf("http://%s:%d/index.html",ipAddress,PORT)
 	mes strf("open server. [%s]",url)
 
+	goto *server
+	
+*server_reset
+
+	mes strf("[warning] wparam=%d, lparam=%d",wparam,lparam)
+	returnText 500,""
+	logPrint 500, requestMethod, requestFrom, requestName
+	stop
+
 *server
 	// wait request
-	waitHTTPRequest 1,PORT
+	waitHTTPRequest SOCKET,PORT
 		;mes refstr
 		requestName = getHTTPName()
 		requestMethod = getHTTPMethod()
@@ -47,16 +60,7 @@
 	httpStatus = router(requestName,requestMethod)
 
 	// log
-	/**/
-	getdatestr date
-	gettimestr time
-	consoleColor
-		print strf("[HSP-SERVER] %s %s:%03d |",date,time,gettime(7)),1
-	consoleColor consoleColorStatus(httpStatus)
-		print strf(" %03d ",httpStatus),1
-	consoleColor
-		print strf("| %5s | %.4fms | %s | %s",fillSpace(requestMethod,5),timeGet(),requestFrom,requestName),0
-	/**/
+	logPrint httpStatus, requestMethod, requestFrom, requestName
 	
 	await
 	goto *server

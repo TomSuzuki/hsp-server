@@ -1,0 +1,16 @@
+
+#module
+#deffunc logPrint int httpStatus,str requestMethod,str requestFrom,str requestName
+
+	getdatestr date
+	gettimestr time
+	
+	consoleColor
+		print strf("[HSP-SERVER] %s %s:%03d |",date,time,gettime(7)),1
+	consoleColor consoleColorStatus(httpStatus)
+		print strf(" %03d ",httpStatus),1
+	consoleColor
+		print strf("| %5s | %.4fms | %s | %s",fillSpace(requestMethod,5),timeGet(),requestFrom,requestName),0
+		
+	return
+#global
