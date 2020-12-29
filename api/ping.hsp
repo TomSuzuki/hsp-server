@@ -1,9 +1,12 @@
 // this is sample api
 #module
-#defcfunc api_ping
+#defcfunc api_ping str request
 	// init
 	httpStatus = 202
 	msg = "おなかすいた"
+
+	// parameter (http://localhost:8080/ping?food=cake)
+	if(getParameter(request,"food") == "cake"):msg = "わーいケーキだー！"
 
 	// send msg
 	returnText httpStatus,msg
