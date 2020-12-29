@@ -22,11 +22,12 @@
 #define DIR	"./html"
 
 	// init
+	timeStart
 	consoleColor
 	dirlist temp,DIR,0
 	if(stat == 0):mkdir DIR
 	chdir DIR
-	onerror goto*server_reset
+	;onerror goto*server_reset
 
 	// IP get
 	ipget

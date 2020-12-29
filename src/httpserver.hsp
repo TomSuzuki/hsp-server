@@ -4,6 +4,8 @@
 
 #module
 
+#define serverName "hsp-server"
+
 #deffunc waitHTTPRequest int socketid,int port
 	// init
 	socket = socketid
@@ -52,17 +54,31 @@
 	return response
 
 #deffunc returnText int httpStatus,str httpBody
-	// return
-	head = strf("HTTP/1.1 %d %s\nContent-Type: text/plain; charset=shift_jis\nConnection: close\n\n",httpStatus,getResponseStr(httpStatus))
+	// head
+	head =  strf("HTTP/1.1 %d %s\n",status,httpResponseMessage(status))
+	head += strf("Content-Type: %s charset=shift_jis\n",contentTypeFromExtension(".txt"))
+	head += strf("Connection: close\n")
+	head += strf("Server: %s\n",serverName)
+	head += strf("\n")
+
+	// put
 	sockput@ head,socketSub
 	sockput@ httpBody,socketSub
+	
 	return
 
 #deffunc returnBuf int httpStatus,var httpBody
-	// return
-	head = strf("HTTP/1.1 %d %s\nContent-Type: text/plain charset=shift_jis\nConnection: close\n\n",httpStatus,getResponseStr(httpStatus))
+	// head
+	head =  strf("HTTP/1.1 %d %s\n",status,httpResponseMessage(status))
+	head += strf("Content-Type: %s charset=shift_jis\n",contentTypeFromExtension(".txt"))
+	head += strf("Connection: close\n")
+	head += strf("Server: %s\n",serverName)
+	head += strf("\n")
+
+	// put
 	sockput@ head,socketSub
 	sockputb@ httpBody,0,varsize(httpBody),socketSub
+	
 	return
 
 #defcfunc returnFile str path
@@ -77,7 +93,11 @@
 	}
 
 	// head
-	head = strf("HTTP/1.1 %d %s\nContent-Type: %s charset=shift_jis\nConnection: close\nServer: hsp-server\n\n",status,getResponseStr(status),contentTypeFromExtension(path))
+	head =  strf("HTTP/1.1 %d %s\n",status,httpResponseMessage(status))
+	head += strf("Content-Type: %s charset=shift_jis\n",contentTypeFromExtension(path))
+	head += strf("Connection: close\n")
+	head += strf("Server: %s\n",serverName)
+	head += strf("\n")
 
 	// put
 	sockput@ head,socketSub
@@ -85,7 +105,7 @@
 	
 	return status
 	
-#defcfunc getResponseStr int httpStatus
+#defcfunc httpResponseMessage int httpStatus
 
 	if(httpStatus == 100):return "Continue"
 	if(httpStatus == 101):return "Switching Protocol"
