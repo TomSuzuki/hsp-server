@@ -24,7 +24,7 @@
 	if(p1/100 == 2):return 0x1F
 	if(p1/100 == 3):return 0x2F
 	if(p1/100 == 4):return 0x4F
-	if(p1/100 == 5):return 0xDC
+	if(p1/100 == 5):return 0xDF
 	
 	return 0x0F
 	

@@ -1,0 +1,13 @@
+// this is sample api
+#module
+#defcfunc api_ping
+	// init
+	httpStatus = 202
+	msg = "‚¨‚È‚©‚·‚¢‚½"
+
+	// send msg
+	returnText httpStatus,msg
+
+	// return
+	return httpStatus
+#global
