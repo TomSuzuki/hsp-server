@@ -1,5 +1,8 @@
 #runtime "hsp3cl"
 
+#cmpopt optcode 0
+
+#include "hspinet.as"
 #include "hspsock.as"
 #include "hsp3util.as"
 #include "hspext.as"
@@ -13,8 +16,11 @@
 #include "./src/timer.hsp"
 #include "./src/log.hsp"
 
+// add api
 #include "./api/ping.hsp"
+#include "./api/json.hsp"
 
+// setting
 #const PORT	8080
 #const SOCKET	1
 

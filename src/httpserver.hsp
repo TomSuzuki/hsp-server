@@ -81,6 +81,16 @@
 	
 	return
 
+#deffunc returnJSONText int httpStatus,str httpBody
+	// head
+	head = createHead(status, ".json")
+
+	// put
+	sockput@ head,socketSub
+	sockput@ httpBody,socketSub
+	
+	return
+
 #deffunc returnBuf int httpStatus,var httpBody
 	// head
 	head = createHead(status, ".txt")
@@ -273,6 +283,27 @@
 	loop
 	
 	return res
+
+#deffunc getAllParameters str headText,array arrParameters
+
+	temp = headText
+	notesel temp
+	noteget data.0
+	noteunsel
+
+	split data," ",temp,data
+	split data,"?",temp,data
+	split data,"&",data
+	num = stat
+	
+	sdim arrParameters,512,num
+	
+	repeat num
+		split data(cnt),"=",key,dat
+		arrParameters.cnt = key
+	loop
+	
+	return
 #global
 
 #module

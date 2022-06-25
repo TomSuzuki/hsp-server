@@ -17,6 +17,9 @@
 	case "GET/ping"
 		httpStatus = api_ping(request)
 		swbreak
+	case "GET/json"
+		httpStatus = api_json(request)
+		swbreak
 	default
 		httpStatus = returnFile("." + requestName)
 	swend

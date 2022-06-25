@@ -1,0 +1,23 @@
+// this is sample api
+#module
+#defcfunc api_json str request
+	// init
+	httpStatus = 202
+
+	// parameter
+	getAllParameters request, params
+
+	// create response
+	jsonnewobj@ jsonPtr
+	repeat length(params)
+		jsonputs@ jsonPtr, params.cnt, getParameter(request, params.cnt)
+	loop
+	jsonout@ jsonText, jsonPtr
+	jsondelobj@ jsonPtr
+
+	// send msg
+	returnJSONText httpStatus, jsonText
+
+	// return
+	return httpStatus
+#global
