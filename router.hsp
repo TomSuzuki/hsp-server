@@ -7,6 +7,11 @@
 
 	// routing
 	route = requestMethod+requestName
+        if instr(route, , "../") != -1 {
+                return 400
+        }
+
+        // route settings
 	split route,"?",route
 	switch route
 	case "GET/"
